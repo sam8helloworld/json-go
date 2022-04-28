@@ -1,0 +1,11 @@
+{
+    "number":123,
+    "boolean":true,
+    "string":"togatoga",
+    "object":{
+       "number":2E10
+    },
+    "array": [
+        1, 2, 3
+    ]
+ }
