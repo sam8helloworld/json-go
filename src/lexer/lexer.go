@@ -2,7 +2,6 @@ package lexer
 
 import (
 	"errors"
-	"fmt"
 
 	"github.com/sam8helloworld/json-go/token"
 )
@@ -82,7 +81,7 @@ func (l *Lexer) Execute() (*[]token.Token, error) {
 			}
 			tokens = append(tokens, *token)
 		default:
-			fmt.Println(string(t))
+			continue
 		}
 	}
 	return &tokens, nil
