@@ -76,3 +76,47 @@ func TestFailedStringTokenize(t *testing.T) {
 		t.Fatalf("want ErrStringTokenize, but got %v", err)
 	}
 }
+
+func TestSuccessBoolTokenize(t *testing.T) {
+	f, err := os.Open("../testdata/bool_only.json")
+	if err != nil {
+		fmt.Println("error")
+	}
+	defer f.Close()
+
+	// 一気に全部読み取り
+	b, err := ioutil.ReadAll(f)
+	if err != nil {
+		fmt.Println("error")
+	}
+	sut := NewLexer(string(b))
+	got, err := sut.Execute()
+	if err != nil {
+		t.Fatalf("failed to execute lexer %#v", err)
+	}
+	want := &[]token.Token{
+		{
+			Type:    token.LeftBraceType,
+			Literal: "{",
+		},
+		{
+			Type:    token.StringType,
+			Literal: "bool",
+		},
+		{
+			Type:    token.ColonType,
+			Literal: ":",
+		},
+		{
+			Type:    token.BoolType,
+			Literal: "true",
+		},
+		{
+			Type:    token.RightBraceType,
+			Literal: "}",
+		},
+	}
+	if diff := cmp.Diff(got, want); diff != "" {
+		t.Fatalf("got differs: (-got +want)\n%s", diff)
+	}
+}
