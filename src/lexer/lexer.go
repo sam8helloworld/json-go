@@ -9,6 +9,7 @@ import (
 var (
 	ErrStringTokenize = errors.New("failed to string tokenize")
 	ErrBoolTokenize   = errors.New("failed to bool tokenize")
+	ErrNullTokenize   = errors.New("failed to null tokenize")
 	ErrLexer          = errors.New("failed to lexer")
 )
 
@@ -89,6 +90,12 @@ func (l *Lexer) Execute() (*[]token.Token, error) {
 				return nil, err
 			}
 			tokens = append(tokens, *token)
+		case NullSymbol:
+			token, err := l.nullTokenize()
+			if err != nil {
+				return nil, err
+			}
+			tokens = append(tokens, *token)
 		case WhiteSpaceSymbol:
 		case WhiteSpaceTabSymbol:
 		case WhiteSpaceCRSymbol:
@@ -160,4 +167,18 @@ func (l *Lexer) boolTokenize(b bool) (*token.Token, error) {
 		}, nil
 	}
 	return nil, ErrBoolTokenize
+}
+
+func (l *Lexer) nullTokenize() (*token.Token, error) {
+	s := string(l.Ch)
+	for i := 0; i < 3; i++ {
+		s += string(l.readChar())
+	}
+	if s == "null" {
+		return &token.Token{
+			Type:    token.NullType,
+			Literal: s,
+		}, nil
+	}
+	return nil, ErrNullTokenize
 }
