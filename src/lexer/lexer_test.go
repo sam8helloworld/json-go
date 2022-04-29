@@ -120,3 +120,24 @@ func TestSuccessBoolTokenize(t *testing.T) {
 		t.Fatalf("got differs: (-got +want)\n%s", diff)
 	}
 }
+func TestFailedLexer(t *testing.T) {
+	f, err := os.Open("../testdata/lexer_structure_fragile.json")
+	if err != nil {
+		fmt.Println("error")
+	}
+	defer f.Close()
+
+	// 一気に全部読み取り
+	b, err := ioutil.ReadAll(f)
+	if err != nil {
+		fmt.Println("error")
+	}
+	sut := NewLexer(string(b))
+	got, err := sut.Execute()
+	if got != nil {
+		t.Errorf("want error %v, but got result %v", ErrLexer, got)
+	}
+	if !errors.Is(err, ErrLexer) {
+		t.Fatalf("want ErrLexer, but got %v", err)
+	}
+}

@@ -8,6 +8,7 @@ import (
 
 var (
 	ErrStringTokenize = errors.New("failed to string tokenize")
+	ErrLexer          = errors.New("failed to lexer")
 )
 
 const (
@@ -81,7 +82,7 @@ func (l *Lexer) Execute() (*[]token.Token, error) {
 			}
 			tokens = append(tokens, *token)
 		default:
-			continue
+			return nil, ErrLexer
 		}
 	}
 	return &tokens, nil
