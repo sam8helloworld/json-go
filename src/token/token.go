@@ -5,7 +5,8 @@ type Type string
 const (
 	StringType       = Type("String")
 	NumberType       = Type("Number")
-	BoolType         = Type("Bool")
+	TrueType         = Type("True")
+	FalseType        = Type("False")
 	NullType         = Type("Null")
 	WhiteSpaceType   = Type("WhiteSpace")
 	LeftBraceType    = Type("LeftBrace")

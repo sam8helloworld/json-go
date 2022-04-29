@@ -8,21 +8,25 @@ import (
 
 var (
 	ErrStringTokenize = errors.New("failed to string tokenize")
+	ErrBoolTokenize   = errors.New("failed to bool tokenize")
 	ErrLexer          = errors.New("failed to lexer")
 )
 
 const (
-	QuoteSymbol        = byte('"')
-	LeftBraceSymbol    = byte('{')
-	RightBraceSymbol   = byte('}')
-	LeftBracketSymbol  = byte('[')
-	RightBracketSymbol = byte(']')
-	CommaSymbol        = byte(',')
-	ColonSymbol        = byte(':')
-	TrueSymbol         = byte('t')
-	FalseSymbol        = byte('f')
-	NullSymbol         = byte('n')
-	WhiteSpace         = byte(' ')
+	QuoteSymbol         = byte('"')
+	LeftBraceSymbol     = byte('{')
+	RightBraceSymbol    = byte('}')
+	LeftBracketSymbol   = byte('[')
+	RightBracketSymbol  = byte(']')
+	CommaSymbol         = byte(',')
+	ColonSymbol         = byte(':')
+	TrueSymbol          = byte('t')
+	FalseSymbol         = byte('f')
+	NullSymbol          = byte('n')
+	WhiteSpaceSymbol    = byte(' ')
+	WhiteSpaceTabSymbol = byte('\t')
+	WhiteSpaceCRSymbol  = byte('\r')
+	WhiteSpaceLFSymbol  = byte('\n')
 )
 
 type Lexer struct {
@@ -73,7 +77,22 @@ func (l *Lexer) Execute() (*[]token.Token, error) {
 				Type:    token.CommaType,
 				Literal: string(t),
 			})
-		case WhiteSpace:
+		case TrueSymbol:
+			token, err := l.boolTokenize(true)
+			if err != nil {
+				return nil, err
+			}
+			tokens = append(tokens, *token)
+		case FalseSymbol:
+			token, err := l.boolTokenize(false)
+			if err != nil {
+				return nil, err
+			}
+			tokens = append(tokens, *token)
+		case WhiteSpaceSymbol:
+		case WhiteSpaceTabSymbol:
+		case WhiteSpaceCRSymbol:
+		case WhiteSpaceLFSymbol:
 			continue
 		case QuoteSymbol:
 			token, err := l.stringTokenize()
@@ -115,4 +134,30 @@ func (l *Lexer) stringTokenize() (*token.Token, error) {
 		str += string(ch)
 	}
 	return nil, ErrStringTokenize
+}
+
+func (l *Lexer) boolTokenize(b bool) (*token.Token, error) {
+	s := string(l.Ch)
+	if b {
+		for i := 0; i < 3; i++ {
+			s += string(l.readChar())
+		}
+		if s == "true" {
+			return &token.Token{
+				Type:    token.TrueType,
+				Literal: s,
+			}, nil
+		}
+		return nil, ErrBoolTokenize
+	}
+	for i := 0; i < 4; i++ {
+		s += string(l.readChar())
+	}
+	if s == "false" {
+		return &token.Token{
+			Type:    token.FalseType,
+			Literal: s,
+		}, nil
+	}
+	return nil, ErrBoolTokenize
 }
