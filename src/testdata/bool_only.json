@@ -1,3 +1,4 @@
 {
-    "bool": true
+    "boolTrue": true,
+    "boolFalse": false
 }

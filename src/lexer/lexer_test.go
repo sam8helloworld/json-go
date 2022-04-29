@@ -101,15 +101,31 @@ func TestSuccessBoolTokenize(t *testing.T) {
 		},
 		{
 			Type:    token.StringType,
-			Literal: "bool",
+			Literal: "boolTrue",
 		},
 		{
 			Type:    token.ColonType,
 			Literal: ":",
 		},
 		{
-			Type:    token.BoolType,
+			Type:    token.TrueType,
 			Literal: "true",
+		},
+		{
+			Type:    token.CommaType,
+			Literal: ",",
+		},
+		{
+			Type:    token.StringType,
+			Literal: "boolFalse",
+		},
+		{
+			Type:    token.ColonType,
+			Literal: ":",
+		},
+		{
+			Type:    token.FalseType,
+			Literal: "false",
 		},
 		{
 			Type:    token.RightBraceType,
@@ -120,6 +136,29 @@ func TestSuccessBoolTokenize(t *testing.T) {
 		t.Fatalf("got differs: (-got +want)\n%s", diff)
 	}
 }
+
+func TestFailedBoolTokenize(t *testing.T) {
+	f, err := os.Open("../testdata/bool_only_fragile.json")
+	if err != nil {
+		fmt.Println("error")
+	}
+	defer f.Close()
+
+	// 一気に全部読み取り
+	b, err := ioutil.ReadAll(f)
+	if err != nil {
+		fmt.Println("error")
+	}
+	sut := NewLexer(string(b))
+	got, err := sut.Execute()
+	if got != nil {
+		t.Errorf("want error %v, but got result %v", ErrBoolTokenize, got)
+	}
+	if !errors.Is(err, ErrBoolTokenize) {
+		t.Fatalf("want ErrBoolTokenize, but got %v", err)
+	}
+}
+
 func TestFailedLexer(t *testing.T) {
 	f, err := os.Open("../testdata/lexer_structure_fragile.json")
 	if err != nil {
