@@ -1,0 +1,11 @@
+{
+    "int": 100,
+    "float": 1.234,
+    "floatDotStart": .1234,
+    "exponentialSmall": 1e10,
+    "exponentialLarge": 1E10,
+    "exponentialPlus": 1e+10,
+    "exponentialMinus": 1e-10,
+    "plus": +10,
+    "minus": -10
+}
