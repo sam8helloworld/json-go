@@ -2,6 +2,7 @@ package lexer
 
 import (
 	"errors"
+	"strconv"
 
 	"github.com/sam8helloworld/json-go/token"
 )
@@ -10,6 +11,7 @@ var (
 	ErrStringTokenize = errors.New("failed to string tokenize")
 	ErrBoolTokenize   = errors.New("failed to bool tokenize")
 	ErrNullTokenize   = errors.New("failed to null tokenize")
+	ErrNumberTokenize = errors.New("failed to number tokenize")
 	ErrLexer          = errors.New("failed to lexer")
 )
 
@@ -28,6 +30,9 @@ const (
 	WhiteSpaceTabSymbol = byte('\t')
 	WhiteSpaceCRSymbol  = byte('\r')
 	WhiteSpaceLFSymbol  = byte('\n')
+	NumberPlusSymbol    = byte('+')
+	NumberMinusSymbol   = byte('-')
+	NumberDotSymbol     = byte('.')
 )
 
 type Lexer struct {
@@ -46,63 +51,71 @@ func (l *Lexer) Execute() (*[]token.Token, error) {
 	// 1文字ずつ読み取ってその文字によってどのパースを行うか分岐
 	// パースしてトークンを返す
 	tokens := []token.Token{}
-	for t := l.readChar(); l.ReadPosition <= len(l.Input); t = l.readChar() {
-		switch t {
-		case LeftBraceSymbol:
+	for ch := l.readChar(); l.ReadPosition <= len(l.Input); ch = l.readChar() {
+		switch {
+		case ch == LeftBraceSymbol:
 			tokens = append(tokens, token.Token{
 				Type:    token.LeftBraceType,
-				Literal: string(t),
+				Literal: string(ch),
 			})
-		case RightBraceSymbol:
+		case ch == RightBraceSymbol:
 			tokens = append(tokens, token.Token{
 				Type:    token.RightBraceType,
-				Literal: string(t),
+				Literal: string(ch),
 			})
-		case LeftBracketSymbol:
+		case ch == LeftBracketSymbol:
 			tokens = append(tokens, token.Token{
 				Type:    token.LeftBracketType,
-				Literal: string(t),
+				Literal: string(ch),
 			})
-		case RightBracketSymbol:
+		case ch == RightBracketSymbol:
 			tokens = append(tokens, token.Token{
 				Type:    token.RightBracketType,
-				Literal: string(t),
+				Literal: string(ch),
 			})
-		case ColonSymbol:
+		case ch == ColonSymbol:
 			tokens = append(tokens, token.Token{
 				Type:    token.ColonType,
-				Literal: string(t),
+				Literal: string(ch),
 			})
-		case CommaSymbol:
+		case ch == CommaSymbol:
 			tokens = append(tokens, token.Token{
 				Type:    token.CommaType,
-				Literal: string(t),
+				Literal: string(ch),
 			})
-		case TrueSymbol:
+		case ch == TrueSymbol:
 			token, err := l.boolTokenize(true)
 			if err != nil {
 				return nil, err
 			}
 			tokens = append(tokens, *token)
-		case FalseSymbol:
+		case ch == FalseSymbol:
 			token, err := l.boolTokenize(false)
 			if err != nil {
 				return nil, err
 			}
 			tokens = append(tokens, *token)
-		case NullSymbol:
+		case ch == NullSymbol:
 			token, err := l.nullTokenize()
 			if err != nil {
 				return nil, err
 			}
 			tokens = append(tokens, *token)
-		case WhiteSpaceSymbol:
-		case WhiteSpaceTabSymbol:
-		case WhiteSpaceCRSymbol:
-		case WhiteSpaceLFSymbol:
+		case ch == WhiteSpaceSymbol, ch == WhiteSpaceTabSymbol, ch == WhiteSpaceTabSymbol, ch == WhiteSpaceCRSymbol, ch == WhiteSpaceLFSymbol:
 			continue
-		case QuoteSymbol:
+		case ch == QuoteSymbol:
 			token, err := l.stringTokenize()
+			if err != nil {
+				return nil, err
+			}
+			tokens = append(tokens, *token)
+		case '0' <= ch && ch <= '9', ch == NumberPlusSymbol, ch == NumberMinusSymbol, ch == NumberDotSymbol:
+			// Numberは開始文字が[0-9]もしくは('+', '-', '.')
+			// e.g.
+			//     -1235
+			//     +10
+			//     .00001
+			token, err := l.numberTokenize()
 			if err != nil {
 				return nil, err
 			}
@@ -127,6 +140,15 @@ func (l *Lexer) readChar() byte {
 	// readpositonを次に進める
 	l.ReadPosition += 1
 	return l.Ch
+}
+
+func (l *Lexer) peakChar() byte {
+	// 入力が終わったらchを0に
+	if l.ReadPosition >= len(l.Input) {
+		return 0
+	} else {
+		return l.Input[l.ReadPosition]
+	}
 }
 
 func (l *Lexer) stringTokenize() (*token.Token, error) {
@@ -181,4 +203,34 @@ func (l *Lexer) nullTokenize() (*token.Token, error) {
 		}, nil
 	}
 	return nil, ErrNullTokenize
+}
+
+func (l *Lexer) numberTokenize() (*token.Token, error) {
+	num := string(l.Ch)
+	for {
+		ch := l.peakChar()
+		if isNumberSymbol(ch) {
+			num += string(ch)
+			l.readChar()
+		} else {
+			break
+		}
+	}
+	_, err := strconv.ParseFloat(num, 64)
+	if err != nil {
+		return nil, ErrNumberTokenize
+	}
+	return &token.Token{
+		Type:    token.NumberType,
+		Literal: num,
+	}, nil
+}
+
+func isNumberSymbol(s byte) bool {
+	// 数字に使いそうな文字は全て読み込む
+	// 1e10, 1E10, 1.0000
+	if ('0' <= s && s <= '9') || s == NumberPlusSymbol || s == NumberMinusSymbol || s == NumberDotSymbol || s == 'e' || s == 'E' {
+		return true
+	}
+	return false
 }
