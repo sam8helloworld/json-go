@@ -18,6 +18,6 @@ const (
 )
 
 type Token struct {
-	Type    Type
-	Literal string
+	Type       Type
+	Expression interface{}
 }

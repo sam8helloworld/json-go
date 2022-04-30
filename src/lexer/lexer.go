@@ -55,33 +55,33 @@ func (l *Lexer) Execute() (*[]token.Token, error) {
 		switch {
 		case ch == LeftBraceSymbol:
 			tokens = append(tokens, token.Token{
-				Type:    token.LeftBraceType,
-				Literal: string(ch),
+				Type:       token.LeftBraceType,
+				Expression: string(ch),
 			})
 		case ch == RightBraceSymbol:
 			tokens = append(tokens, token.Token{
-				Type:    token.RightBraceType,
-				Literal: string(ch),
+				Type:       token.RightBraceType,
+				Expression: string(ch),
 			})
 		case ch == LeftBracketSymbol:
 			tokens = append(tokens, token.Token{
-				Type:    token.LeftBracketType,
-				Literal: string(ch),
+				Type:       token.LeftBracketType,
+				Expression: string(ch),
 			})
 		case ch == RightBracketSymbol:
 			tokens = append(tokens, token.Token{
-				Type:    token.RightBracketType,
-				Literal: string(ch),
+				Type:       token.RightBracketType,
+				Expression: string(ch),
 			})
 		case ch == ColonSymbol:
 			tokens = append(tokens, token.Token{
-				Type:    token.ColonType,
-				Literal: string(ch),
+				Type:       token.ColonType,
+				Expression: string(ch),
 			})
 		case ch == CommaSymbol:
 			tokens = append(tokens, token.Token{
-				Type:    token.CommaType,
-				Literal: string(ch),
+				Type:       token.CommaType,
+				Expression: string(ch),
 			})
 		case ch == TrueSymbol:
 			token, err := l.boolTokenize(true)
@@ -156,8 +156,8 @@ func (l *Lexer) stringTokenize() (*token.Token, error) {
 	for ch := l.readChar(); ch != 0; ch = l.readChar() {
 		if ch == QuoteSymbol {
 			return &token.Token{
-				Type:    token.StringType,
-				Literal: str,
+				Type:       token.StringType,
+				Expression: str,
 			}, nil
 		}
 		str += string(ch)
@@ -173,8 +173,8 @@ func (l *Lexer) boolTokenize(b bool) (*token.Token, error) {
 		}
 		if s == "true" {
 			return &token.Token{
-				Type:    token.TrueType,
-				Literal: s,
+				Type:       token.TrueType,
+				Expression: true,
 			}, nil
 		}
 		return nil, ErrBoolTokenize
@@ -184,8 +184,8 @@ func (l *Lexer) boolTokenize(b bool) (*token.Token, error) {
 	}
 	if s == "false" {
 		return &token.Token{
-			Type:    token.FalseType,
-			Literal: s,
+			Type:       token.FalseType,
+			Expression: false,
 		}, nil
 	}
 	return nil, ErrBoolTokenize
@@ -198,8 +198,8 @@ func (l *Lexer) nullTokenize() (*token.Token, error) {
 	}
 	if s == "null" {
 		return &token.Token{
-			Type:    token.NullType,
-			Literal: s,
+			Type:       token.NullType,
+			Expression: s,
 		}, nil
 	}
 	return nil, ErrNullTokenize
@@ -216,13 +216,13 @@ func (l *Lexer) numberTokenize() (*token.Token, error) {
 			break
 		}
 	}
-	_, err := strconv.ParseFloat(num, 64)
+	f64, err := strconv.ParseFloat(num, 64)
 	if err != nil {
 		return nil, ErrNumberTokenize
 	}
 	return &token.Token{
-		Type:    token.NumberType,
-		Literal: num,
+		Type:       token.NumberType,
+		Expression: f64,
 	}, nil
 }
 

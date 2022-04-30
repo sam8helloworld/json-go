@@ -30,24 +30,24 @@ func TestSuccessStringTokenize(t *testing.T) {
 	}
 	want := &[]token.Token{
 		{
-			Type:    token.LeftBraceType,
-			Literal: "{",
+			Type:       token.LeftBraceType,
+			Expression: "{",
 		},
 		{
-			Type:    token.StringType,
-			Literal: "string",
+			Type:       token.StringType,
+			Expression: "string",
 		},
 		{
-			Type:    token.ColonType,
-			Literal: ":",
+			Type:       token.ColonType,
+			Expression: ":",
 		},
 		{
-			Type:    token.StringType,
-			Literal: "hogehoge",
+			Type:       token.StringType,
+			Expression: "hogehoge",
 		},
 		{
-			Type:    token.RightBraceType,
-			Literal: "}",
+			Type:       token.RightBraceType,
+			Expression: "}",
 		},
 	}
 	if diff := cmp.Diff(got, want); diff != "" {
@@ -96,40 +96,40 @@ func TestSuccessBoolTokenize(t *testing.T) {
 	}
 	want := &[]token.Token{
 		{
-			Type:    token.LeftBraceType,
-			Literal: "{",
+			Type:       token.LeftBraceType,
+			Expression: "{",
 		},
 		{
-			Type:    token.StringType,
-			Literal: "boolTrue",
+			Type:       token.StringType,
+			Expression: "boolTrue",
 		},
 		{
-			Type:    token.ColonType,
-			Literal: ":",
+			Type:       token.ColonType,
+			Expression: ":",
 		},
 		{
-			Type:    token.TrueType,
-			Literal: "true",
+			Type:       token.TrueType,
+			Expression: true,
 		},
 		{
-			Type:    token.CommaType,
-			Literal: ",",
+			Type:       token.CommaType,
+			Expression: ",",
 		},
 		{
-			Type:    token.StringType,
-			Literal: "boolFalse",
+			Type:       token.StringType,
+			Expression: "boolFalse",
 		},
 		{
-			Type:    token.ColonType,
-			Literal: ":",
+			Type:       token.ColonType,
+			Expression: ":",
 		},
 		{
-			Type:    token.FalseType,
-			Literal: "false",
+			Type:       token.FalseType,
+			Expression: false,
 		},
 		{
-			Type:    token.RightBraceType,
-			Literal: "}",
+			Type:       token.RightBraceType,
+			Expression: "}",
 		},
 	}
 	if diff := cmp.Diff(got, want); diff != "" {
@@ -178,24 +178,24 @@ func TestSuccessNullTokenize(t *testing.T) {
 	}
 	want := &[]token.Token{
 		{
-			Type:    token.LeftBraceType,
-			Literal: "{",
+			Type:       token.LeftBraceType,
+			Expression: "{",
 		},
 		{
-			Type:    token.StringType,
-			Literal: "null",
+			Type:       token.StringType,
+			Expression: "null",
 		},
 		{
-			Type:    token.ColonType,
-			Literal: ":",
+			Type:       token.ColonType,
+			Expression: ":",
 		},
 		{
-			Type:    token.NullType,
-			Literal: "null",
+			Type:       token.NullType,
+			Expression: "null",
 		},
 		{
-			Type:    token.RightBraceType,
-			Literal: "}",
+			Type:       token.RightBraceType,
+			Expression: "}",
 		},
 	}
 	if diff := cmp.Diff(got, want); diff != "" {
@@ -244,161 +244,161 @@ func TestSuccessNumberTokenize(t *testing.T) {
 	}
 	want := &[]token.Token{
 		{
-			Type:    token.LeftBraceType,
-			Literal: "{",
+			Type:       token.LeftBraceType,
+			Expression: "{",
 		},
 		// "int": 100
 		{
-			Type:    token.StringType,
-			Literal: "int",
+			Type:       token.StringType,
+			Expression: "int",
 		},
 		{
-			Type:    token.ColonType,
-			Literal: ":",
+			Type:       token.ColonType,
+			Expression: ":",
 		},
 		{
-			Type:    token.NumberType,
-			Literal: "100",
+			Type:       token.NumberType,
+			Expression: float64(100),
 		},
 		{
-			Type:    token.CommaType,
-			Literal: ",",
+			Type:       token.CommaType,
+			Expression: ",",
 		},
 		// "float": 1.234
 		{
-			Type:    token.StringType,
-			Literal: "float",
+			Type:       token.StringType,
+			Expression: "float",
 		},
 		{
-			Type:    token.ColonType,
-			Literal: ":",
+			Type:       token.ColonType,
+			Expression: ":",
 		},
 		{
-			Type:    token.NumberType,
-			Literal: "1.234",
+			Type:       token.NumberType,
+			Expression: float64(1.234),
 		},
 		{
-			Type:    token.CommaType,
-			Literal: ",",
+			Type:       token.CommaType,
+			Expression: ",",
 		},
 		// "floatDotStart": .1234
 		{
-			Type:    token.StringType,
-			Literal: "floatDotStart",
+			Type:       token.StringType,
+			Expression: "floatDotStart",
 		},
 		{
-			Type:    token.ColonType,
-			Literal: ":",
+			Type:       token.ColonType,
+			Expression: ":",
 		},
 		{
-			Type:    token.NumberType,
-			Literal: ".1234",
+			Type:       token.NumberType,
+			Expression: float64(.1234),
 		},
 		{
-			Type:    token.CommaType,
-			Literal: ",",
+			Type:       token.CommaType,
+			Expression: ",",
 		},
 		// "exponentialSmall": 1e10
 		{
-			Type:    token.StringType,
-			Literal: "exponentialSmall",
+			Type:       token.StringType,
+			Expression: "exponentialSmall",
 		},
 		{
-			Type:    token.ColonType,
-			Literal: ":",
+			Type:       token.ColonType,
+			Expression: ":",
 		},
 		{
-			Type:    token.NumberType,
-			Literal: "1e10",
+			Type:       token.NumberType,
+			Expression: float64(1e10),
 		},
 		{
-			Type:    token.CommaType,
-			Literal: ",",
+			Type:       token.CommaType,
+			Expression: ",",
 		},
 		// "exponentialLarge": 1E10
 		{
-			Type:    token.StringType,
-			Literal: "exponentialLarge",
+			Type:       token.StringType,
+			Expression: "exponentialLarge",
 		},
 		{
-			Type:    token.ColonType,
-			Literal: ":",
+			Type:       token.ColonType,
+			Expression: ":",
 		},
 		{
-			Type:    token.NumberType,
-			Literal: "1E10",
+			Type:       token.NumberType,
+			Expression: float64(1e10),
 		},
 		{
-			Type:    token.CommaType,
-			Literal: ",",
+			Type:       token.CommaType,
+			Expression: ",",
 		},
 		// "exponentialPlus": 1e+10
 		{
-			Type:    token.StringType,
-			Literal: "exponentialPlus",
+			Type:       token.StringType,
+			Expression: "exponentialPlus",
 		},
 		{
-			Type:    token.ColonType,
-			Literal: ":",
+			Type:       token.ColonType,
+			Expression: ":",
 		},
 		{
-			Type:    token.NumberType,
-			Literal: "1e+10",
+			Type:       token.NumberType,
+			Expression: float64(1e+10),
 		},
 		{
-			Type:    token.CommaType,
-			Literal: ",",
+			Type:       token.CommaType,
+			Expression: ",",
 		},
 		// "exponentialMinus": 1e-10
 		{
-			Type:    token.StringType,
-			Literal: "exponentialMinus",
+			Type:       token.StringType,
+			Expression: "exponentialMinus",
 		},
 		{
-			Type:    token.ColonType,
-			Literal: ":",
+			Type:       token.ColonType,
+			Expression: ":",
 		},
 		{
-			Type:    token.NumberType,
-			Literal: "1e-10",
+			Type:       token.NumberType,
+			Expression: float64(1e-10),
 		},
 		{
-			Type:    token.CommaType,
-			Literal: ",",
+			Type:       token.CommaType,
+			Expression: ",",
 		},
 		// "plus": +10
 		{
-			Type:    token.StringType,
-			Literal: "plus",
+			Type:       token.StringType,
+			Expression: "plus",
 		},
 		{
-			Type:    token.ColonType,
-			Literal: ":",
+			Type:       token.ColonType,
+			Expression: ":",
 		},
 		{
-			Type:    token.NumberType,
-			Literal: "+10",
+			Type:       token.NumberType,
+			Expression: float64(10),
 		},
 		{
-			Type:    token.CommaType,
-			Literal: ",",
+			Type:       token.CommaType,
+			Expression: ",",
 		},
 		// "minus": -10
 		{
-			Type:    token.StringType,
-			Literal: "minus",
+			Type:       token.StringType,
+			Expression: "minus",
 		},
 		{
-			Type:    token.ColonType,
-			Literal: ":",
+			Type:       token.ColonType,
+			Expression: ":",
 		},
 		{
-			Type:    token.NumberType,
-			Literal: "-10",
+			Type:       token.NumberType,
+			Expression: float64(-10),
 		},
 		{
-			Type:    token.RightBraceType,
-			Literal: "}",
+			Type:       token.RightBraceType,
+			Expression: "}",
 		},
 	}
 	if diff := cmp.Diff(got, want); diff != "" {
