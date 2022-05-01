@@ -52,53 +52,35 @@ func (l *Lexer) Execute() (*[]token.Token, error) {
 	for ch := l.readChar(); l.ReadPosition <= len(l.Input); ch = l.readChar() {
 		switch {
 		case ch == LeftBraceSymbol:
-			tokens = append(tokens, token.Token{
-				Type:       token.LeftBraceType,
-				Expression: string(ch),
-			})
+			tokens = append(tokens, token.LeftBraceToken{})
 		case ch == RightBraceSymbol:
-			tokens = append(tokens, token.Token{
-				Type:       token.RightBraceType,
-				Expression: string(ch),
-			})
+			tokens = append(tokens, token.RightBraceToken{})
 		case ch == LeftBracketSymbol:
-			tokens = append(tokens, token.Token{
-				Type:       token.LeftBracketType,
-				Expression: string(ch),
-			})
+			tokens = append(tokens, token.LeftBracketToken{})
 		case ch == RightBracketSymbol:
-			tokens = append(tokens, token.Token{
-				Type:       token.RightBracketType,
-				Expression: string(ch),
-			})
+			tokens = append(tokens, token.RightBracketToken{})
 		case ch == ColonSymbol:
-			tokens = append(tokens, token.Token{
-				Type:       token.ColonType,
-				Expression: string(ch),
-			})
+			tokens = append(tokens, token.ColonToken{})
 		case ch == CommaSymbol:
-			tokens = append(tokens, token.Token{
-				Type:       token.CommaType,
-				Expression: string(ch),
-			})
+			tokens = append(tokens, token.CommaToken{})
 		case ch == TrueSymbol:
 			token, err := l.boolTokenize(true)
 			if err != nil {
 				return nil, err
 			}
-			tokens = append(tokens, *token)
+			tokens = append(tokens, token)
 		case ch == FalseSymbol:
 			token, err := l.boolTokenize(false)
 			if err != nil {
 				return nil, err
 			}
-			tokens = append(tokens, *token)
+			tokens = append(tokens, token)
 		case ch == NullSymbol:
 			token, err := l.nullTokenize()
 			if err != nil {
 				return nil, err
 			}
-			tokens = append(tokens, *token)
+			tokens = append(tokens, token)
 		case ch == WhiteSpaceSymbol, ch == WhiteSpaceTabSymbol, ch == WhiteSpaceTabSymbol, ch == WhiteSpaceCRSymbol, ch == WhiteSpaceLFSymbol:
 			continue
 		case ch == QuoteSymbol:
@@ -106,7 +88,7 @@ func (l *Lexer) Execute() (*[]token.Token, error) {
 			if err != nil {
 				return nil, err
 			}
-			tokens = append(tokens, *token)
+			tokens = append(tokens, token)
 		case '0' <= ch && ch <= '9', ch == NumberPlusSymbol, ch == NumberMinusSymbol, ch == NumberDotSymbol:
 			// Numberは開始文字が[0-9]もしくは('+', '-', '.')
 			// e.g.
@@ -117,7 +99,7 @@ func (l *Lexer) Execute() (*[]token.Token, error) {
 			if err != nil {
 				return nil, err
 			}
-			tokens = append(tokens, *token)
+			tokens = append(tokens, token)
 		default:
 			return nil, ErrLexer
 		}
@@ -149,31 +131,25 @@ func (l *Lexer) peakChar() byte {
 	}
 }
 
-func (l *Lexer) stringTokenize() (*token.Token, error) {
+func (l *Lexer) stringTokenize() (token.Token, error) {
 	str := ""
 	for ch := l.readChar(); ch != 0; ch = l.readChar() {
 		if ch == QuoteSymbol {
-			return &token.Token{
-				Type:       token.StringType,
-				Expression: str,
-			}, nil
+			return token.NewStringToken(str), nil
 		}
 		str += string(ch)
 	}
 	return nil, ErrStringTokenize
 }
 
-func (l *Lexer) boolTokenize(b bool) (*token.Token, error) {
+func (l *Lexer) boolTokenize(b bool) (token.Token, error) {
 	s := string(l.Ch)
 	if b {
 		for i := 0; i < 3; i++ {
 			s += string(l.readChar())
 		}
 		if s == "true" {
-			return &token.Token{
-				Type:       token.TrueType,
-				Expression: s,
-			}, nil
+			return token.TrueToken{}, nil
 		}
 		return nil, ErrBoolTokenize
 	}
@@ -181,29 +157,23 @@ func (l *Lexer) boolTokenize(b bool) (*token.Token, error) {
 		s += string(l.readChar())
 	}
 	if s == "false" {
-		return &token.Token{
-			Type:       token.FalseType,
-			Expression: s,
-		}, nil
+		return token.FalseToken{}, nil
 	}
 	return nil, ErrBoolTokenize
 }
 
-func (l *Lexer) nullTokenize() (*token.Token, error) {
+func (l *Lexer) nullTokenize() (token.Token, error) {
 	s := string(l.Ch)
 	for i := 0; i < 3; i++ {
 		s += string(l.readChar())
 	}
 	if s == "null" {
-		return &token.Token{
-			Type:       token.NullType,
-			Expression: s,
-		}, nil
+		return token.NullToken{}, nil
 	}
 	return nil, ErrNullTokenize
 }
 
-func (l *Lexer) numberTokenize() (*token.Token, error) {
+func (l *Lexer) numberTokenize() (token.Token, error) {
 	num := string(l.Ch)
 	for {
 		ch := l.peakChar()
@@ -214,10 +184,7 @@ func (l *Lexer) numberTokenize() (*token.Token, error) {
 			break
 		}
 	}
-	return &token.Token{
-		Type:       token.NumberType,
-		Expression: num,
-	}, nil
+	return token.NewNumberToken(num), nil
 }
 
 func isNumberSymbol(s byte) bool {

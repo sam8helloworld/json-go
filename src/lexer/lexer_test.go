@@ -29,28 +29,13 @@ func TestSuccessStringTokenize(t *testing.T) {
 		t.Fatalf("failed to execute lexer %#v", err)
 	}
 	want := &[]token.Token{
-		{
-			Type:       token.LeftBraceType,
-			Expression: "{",
-		},
-		{
-			Type:       token.StringType,
-			Expression: "string",
-		},
-		{
-			Type:       token.ColonType,
-			Expression: ":",
-		},
-		{
-			Type:       token.StringType,
-			Expression: "hogehoge",
-		},
-		{
-			Type:       token.RightBraceType,
-			Expression: "}",
-		},
+		token.LeftBraceToken{},
+		token.NewStringToken("string"),
+		token.ColonToken{},
+		token.NewStringToken("hogehoge"),
+		token.RightBraceToken{},
 	}
-	if diff := cmp.Diff(got, want); diff != "" {
+	if diff := cmp.Diff(got, want, cmp.AllowUnexported(token.StringToken{})); diff != "" {
 		t.Fatalf("got differs: (-got +want)\n%s", diff)
 	}
 }
@@ -95,44 +80,17 @@ func TestSuccessBoolTokenize(t *testing.T) {
 		t.Fatalf("failed to execute lexer %#v", err)
 	}
 	want := &[]token.Token{
-		{
-			Type:       token.LeftBraceType,
-			Expression: "{",
-		},
-		{
-			Type:       token.StringType,
-			Expression: "boolTrue",
-		},
-		{
-			Type:       token.ColonType,
-			Expression: ":",
-		},
-		{
-			Type:       token.TrueType,
-			Expression: "true",
-		},
-		{
-			Type:       token.CommaType,
-			Expression: ",",
-		},
-		{
-			Type:       token.StringType,
-			Expression: "boolFalse",
-		},
-		{
-			Type:       token.ColonType,
-			Expression: ":",
-		},
-		{
-			Type:       token.FalseType,
-			Expression: "false",
-		},
-		{
-			Type:       token.RightBraceType,
-			Expression: "}",
-		},
+		token.LeftBraceToken{},
+		token.NewStringToken("boolTrue"),
+		token.ColonToken{},
+		token.TrueToken{},
+		token.CommaToken{},
+		token.NewStringToken("boolFalse"),
+		token.ColonToken{},
+		token.FalseToken{},
+		token.RightBraceToken{},
 	}
-	if diff := cmp.Diff(got, want); diff != "" {
+	if diff := cmp.Diff(got, want, cmp.AllowUnexported(token.StringToken{})); diff != "" {
 		t.Fatalf("got differs: (-got +want)\n%s", diff)
 	}
 }
@@ -177,28 +135,13 @@ func TestSuccessNullTokenize(t *testing.T) {
 		t.Fatalf("failed to execute lexer %#v", err)
 	}
 	want := &[]token.Token{
-		{
-			Type:       token.LeftBraceType,
-			Expression: "{",
-		},
-		{
-			Type:       token.StringType,
-			Expression: "null",
-		},
-		{
-			Type:       token.ColonType,
-			Expression: ":",
-		},
-		{
-			Type:       token.NullType,
-			Expression: "null",
-		},
-		{
-			Type:       token.RightBraceType,
-			Expression: "}",
-		},
+		token.LeftBraceToken{},
+		token.NewStringToken("null"),
+		token.ColonToken{},
+		token.NullToken{},
+		token.RightBraceToken{},
 	}
-	if diff := cmp.Diff(got, want); diff != "" {
+	if diff := cmp.Diff(got, want, cmp.AllowUnexported(token.StringToken{})); diff != "" {
 		t.Fatalf("got differs: (-got +want)\n%s", diff)
 	}
 }
@@ -243,165 +186,54 @@ func TestSuccessNumberTokenize(t *testing.T) {
 		t.Fatalf("failed to execute lexer %#v", err)
 	}
 	want := &[]token.Token{
-		{
-			Type:       token.LeftBraceType,
-			Expression: "{",
-		},
+		token.LeftBraceToken{},
 		// "int": 100
-		{
-			Type:       token.StringType,
-			Expression: "int",
-		},
-		{
-			Type:       token.ColonType,
-			Expression: ":",
-		},
-		{
-			Type:       token.NumberType,
-			Expression: "100",
-		},
-		{
-			Type:       token.CommaType,
-			Expression: ",",
-		},
+		token.NewStringToken("int"),
+		token.ColonToken{},
+		token.NewNumberToken("100"),
+		token.CommaToken{},
 		// "float": 1.234
-		{
-			Type:       token.StringType,
-			Expression: "float",
-		},
-		{
-			Type:       token.ColonType,
-			Expression: ":",
-		},
-		{
-			Type:       token.NumberType,
-			Expression: "1.234",
-		},
-		{
-			Type:       token.CommaType,
-			Expression: ",",
-		},
+		token.NewStringToken("float"),
+		token.ColonToken{},
+		token.NewNumberToken("1.234"),
+		token.CommaToken{},
 		// "floatDotStart": .1234
-		{
-			Type:       token.StringType,
-			Expression: "floatDotStart",
-		},
-		{
-			Type:       token.ColonType,
-			Expression: ":",
-		},
-		{
-			Type:       token.NumberType,
-			Expression: ".1234",
-		},
-		{
-			Type:       token.CommaType,
-			Expression: ",",
-		},
+		token.NewStringToken("floatDotStart"),
+		token.ColonToken{},
+		token.NewNumberToken(".1234"),
+		token.CommaToken{},
 		// "exponentialSmall": 1e10
-		{
-			Type:       token.StringType,
-			Expression: "exponentialSmall",
-		},
-		{
-			Type:       token.ColonType,
-			Expression: ":",
-		},
-		{
-			Type:       token.NumberType,
-			Expression: "1e10",
-		},
-		{
-			Type:       token.CommaType,
-			Expression: ",",
-		},
+		token.NewStringToken("exponentialSmall"),
+		token.ColonToken{},
+		token.NewNumberToken("1e10"),
+		token.CommaToken{},
 		// "exponentialLarge": 1E10
-		{
-			Type:       token.StringType,
-			Expression: "exponentialLarge",
-		},
-		{
-			Type:       token.ColonType,
-			Expression: ":",
-		},
-		{
-			Type:       token.NumberType,
-			Expression: "1E10",
-		},
-		{
-			Type:       token.CommaType,
-			Expression: ",",
-		},
+		token.NewStringToken("exponentialLarge"),
+		token.ColonToken{},
+		token.NewNumberToken("1E10"),
+		token.CommaToken{},
 		// "exponentialPlus": 1e+10
-		{
-			Type:       token.StringType,
-			Expression: "exponentialPlus",
-		},
-		{
-			Type:       token.ColonType,
-			Expression: ":",
-		},
-		{
-			Type:       token.NumberType,
-			Expression: "1e+10",
-		},
-		{
-			Type:       token.CommaType,
-			Expression: ",",
-		},
+		token.NewStringToken("exponentialPlus"),
+		token.ColonToken{},
+		token.NewNumberToken("1e+10"),
+		token.CommaToken{},
 		// "exponentialMinus": 1e-10
-		{
-			Type:       token.StringType,
-			Expression: "exponentialMinus",
-		},
-		{
-			Type:       token.ColonType,
-			Expression: ":",
-		},
-		{
-			Type:       token.NumberType,
-			Expression: "1e-10",
-		},
-		{
-			Type:       token.CommaType,
-			Expression: ",",
-		},
+		token.NewStringToken("exponentialMinus"),
+		token.ColonToken{},
+		token.NewNumberToken("1e-10"),
+		token.CommaToken{},
 		// "plus": +10
-		{
-			Type:       token.StringType,
-			Expression: "plus",
-		},
-		{
-			Type:       token.ColonType,
-			Expression: ":",
-		},
-		{
-			Type:       token.NumberType,
-			Expression: "+10",
-		},
-		{
-			Type:       token.CommaType,
-			Expression: ",",
-		},
+		token.NewStringToken("plus"),
+		token.ColonToken{},
+		token.NewNumberToken("+10"),
+		token.CommaToken{},
 		// "minus": -10
-		{
-			Type:       token.StringType,
-			Expression: "minus",
-		},
-		{
-			Type:       token.ColonType,
-			Expression: ":",
-		},
-		{
-			Type:       token.NumberType,
-			Expression: "-10",
-		},
-		{
-			Type:       token.RightBraceType,
-			Expression: "}",
-		},
+		token.NewStringToken("minus"),
+		token.ColonToken{},
+		token.NewNumberToken("-10"),
+		token.RightBraceToken{},
 	}
-	if diff := cmp.Diff(got, want); diff != "" {
+	if diff := cmp.Diff(got, want, cmp.AllowUnexported(token.StringToken{}, token.NumberToken{})); diff != "" {
 		t.Fatalf("got differs: (-got +want)\n%s", diff)
 	}
 }
