@@ -59,7 +59,7 @@ func TestSuccess(t *testing.T) {
 				},
 				{
 					Type:       token.NumberType,
-					Expression: float64(100),
+					Expression: "100",
 				},
 				{
 					Type:       token.RightBraceType,
@@ -67,7 +67,7 @@ func TestSuccess(t *testing.T) {
 				},
 			},
 			want: value.Object{
-				"key": value.Number(100),
+				"key": value.Number(int64(100)),
 			},
 		},
 		{
@@ -87,7 +87,7 @@ func TestSuccess(t *testing.T) {
 				},
 				{
 					Type:       token.TrueType,
-					Expression: true,
+					Expression: "true",
 				},
 				{
 					Type:       token.RightBraceType,

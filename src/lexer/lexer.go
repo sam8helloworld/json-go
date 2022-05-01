@@ -2,7 +2,6 @@ package lexer
 
 import (
 	"errors"
-	"strconv"
 
 	"github.com/sam8helloworld/json-go/token"
 )
@@ -11,7 +10,6 @@ var (
 	ErrStringTokenize = errors.New("failed to string tokenize")
 	ErrBoolTokenize   = errors.New("failed to bool tokenize")
 	ErrNullTokenize   = errors.New("failed to null tokenize")
-	ErrNumberTokenize = errors.New("failed to number tokenize")
 	ErrLexer          = errors.New("failed to lexer")
 )
 
@@ -174,7 +172,7 @@ func (l *Lexer) boolTokenize(b bool) (*token.Token, error) {
 		if s == "true" {
 			return &token.Token{
 				Type:       token.TrueType,
-				Expression: true,
+				Expression: s,
 			}, nil
 		}
 		return nil, ErrBoolTokenize
@@ -185,7 +183,7 @@ func (l *Lexer) boolTokenize(b bool) (*token.Token, error) {
 	if s == "false" {
 		return &token.Token{
 			Type:       token.FalseType,
-			Expression: false,
+			Expression: s,
 		}, nil
 	}
 	return nil, ErrBoolTokenize
@@ -216,13 +214,9 @@ func (l *Lexer) numberTokenize() (*token.Token, error) {
 			break
 		}
 	}
-	f64, err := strconv.ParseFloat(num, 64)
-	if err != nil {
-		return nil, ErrNumberTokenize
-	}
 	return &token.Token{
 		Type:       token.NumberType,
-		Expression: f64,
+		Expression: num,
 	}, nil
 }
 

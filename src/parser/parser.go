@@ -2,6 +2,7 @@ package parser
 
 import (
 	"errors"
+	"strconv"
 
 	"github.com/sam8helloworld/json-go/token"
 	"github.com/sam8helloworld/json-go/value"
@@ -12,6 +13,8 @@ var (
 	ErrNotStartWithLeftBracket = errors.New("not start with '['")
 	ErrInvalidKeyValuePair     = errors.New("invalid key value pair")
 	ErrInvalidArrayValue       = errors.New("invalid array value")
+	ErrInvalidNumberValue      = errors.New("invalid number value")
+	ErrInvalidBoolValue        = errors.New("invalid bool value")
 	ErrParse                   = errors.New("failed to parse")
 )
 
@@ -40,13 +43,25 @@ func (p *Parser) parse() (interface{}, error) {
 		return p.parseArray()
 	case token.StringType:
 		p.next()
-		return value.String(t.Expression.(string)), nil
+		return value.String(t.Expression), nil
 	case token.NumberType:
 		p.next()
-		return value.Number(t.Expression.(float64)), nil
+		i, err := strconv.ParseInt(t.Expression, 10, 64)
+		if err == nil {
+			return value.Number(i), nil
+		}
+		f, err := strconv.ParseFloat(t.Expression, 64)
+		if err == nil {
+			return value.Number(f), nil
+		}
+		return nil, ErrInvalidNumberValue
 	case token.FalseType, token.TrueType:
 		p.next()
-		return value.Bool(t.Expression.(bool)), nil
+		b, err := strconv.ParseBool(t.Expression)
+		if err != nil {
+			return nil, ErrInvalidBoolValue
+		}
+		return value.Bool(b), nil
 	case token.NullType:
 		p.next()
 		return value.Null(t.Expression), nil
@@ -78,7 +93,7 @@ func (p *Parser) parseObject() (value.Object, error) {
 			if err != nil {
 				return nil, err
 			}
-			object[t1.Expression.(string)] = v
+			object[t1.Expression] = v
 		} else {
 			return nil, ErrInvalidKeyValuePair
 		}

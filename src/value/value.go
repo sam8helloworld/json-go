@@ -1,7 +1,7 @@
 package value
 
 type String string
-type Number float64
+type Number interface{}
 type Bool bool
 type Null interface{}
 type Array []interface{}

@@ -109,7 +109,7 @@ func TestSuccessBoolTokenize(t *testing.T) {
 		},
 		{
 			Type:       token.TrueType,
-			Expression: true,
+			Expression: "true",
 		},
 		{
 			Type:       token.CommaType,
@@ -125,7 +125,7 @@ func TestSuccessBoolTokenize(t *testing.T) {
 		},
 		{
 			Type:       token.FalseType,
-			Expression: false,
+			Expression: "false",
 		},
 		{
 			Type:       token.RightBraceType,
@@ -258,7 +258,7 @@ func TestSuccessNumberTokenize(t *testing.T) {
 		},
 		{
 			Type:       token.NumberType,
-			Expression: float64(100),
+			Expression: "100",
 		},
 		{
 			Type:       token.CommaType,
@@ -275,7 +275,7 @@ func TestSuccessNumberTokenize(t *testing.T) {
 		},
 		{
 			Type:       token.NumberType,
-			Expression: float64(1.234),
+			Expression: "1.234",
 		},
 		{
 			Type:       token.CommaType,
@@ -292,7 +292,7 @@ func TestSuccessNumberTokenize(t *testing.T) {
 		},
 		{
 			Type:       token.NumberType,
-			Expression: float64(.1234),
+			Expression: ".1234",
 		},
 		{
 			Type:       token.CommaType,
@@ -309,7 +309,7 @@ func TestSuccessNumberTokenize(t *testing.T) {
 		},
 		{
 			Type:       token.NumberType,
-			Expression: float64(1e10),
+			Expression: "1e10",
 		},
 		{
 			Type:       token.CommaType,
@@ -326,7 +326,7 @@ func TestSuccessNumberTokenize(t *testing.T) {
 		},
 		{
 			Type:       token.NumberType,
-			Expression: float64(1e10),
+			Expression: "1E10",
 		},
 		{
 			Type:       token.CommaType,
@@ -343,7 +343,7 @@ func TestSuccessNumberTokenize(t *testing.T) {
 		},
 		{
 			Type:       token.NumberType,
-			Expression: float64(1e+10),
+			Expression: "1e+10",
 		},
 		{
 			Type:       token.CommaType,
@@ -360,7 +360,7 @@ func TestSuccessNumberTokenize(t *testing.T) {
 		},
 		{
 			Type:       token.NumberType,
-			Expression: float64(1e-10),
+			Expression: "1e-10",
 		},
 		{
 			Type:       token.CommaType,
@@ -377,7 +377,7 @@ func TestSuccessNumberTokenize(t *testing.T) {
 		},
 		{
 			Type:       token.NumberType,
-			Expression: float64(10),
+			Expression: "+10",
 		},
 		{
 			Type:       token.CommaType,
@@ -394,7 +394,7 @@ func TestSuccessNumberTokenize(t *testing.T) {
 		},
 		{
 			Type:       token.NumberType,
-			Expression: float64(-10),
+			Expression: "-10",
 		},
 		{
 			Type:       token.RightBraceType,
@@ -403,28 +403,6 @@ func TestSuccessNumberTokenize(t *testing.T) {
 	}
 	if diff := cmp.Diff(got, want); diff != "" {
 		t.Fatalf("got differs: (-got +want)\n%s", diff)
-	}
-}
-
-func TestFailedNumberTokenize(t *testing.T) {
-	f, err := os.Open("../testdata/number_only_fragile.json")
-	if err != nil {
-		fmt.Println("error")
-	}
-	defer f.Close()
-
-	// 一気に全部読み取り
-	b, err := ioutil.ReadAll(f)
-	if err != nil {
-		fmt.Println("error")
-	}
-	sut := NewLexer(string(b))
-	got, err := sut.Execute()
-	if got != nil {
-		t.Errorf("want error %v, but got result %v", ErrNumberTokenize, got)
-	}
-	if !errors.Is(err, ErrNumberTokenize) {
-		t.Fatalf("want ErrNumberTokenize, but got %v", err)
 	}
 }
 

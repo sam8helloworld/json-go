@@ -19,5 +19,5 @@ const (
 
 type Token struct {
 	Type       Type
-	Expression interface{}
+	Expression string
 }
