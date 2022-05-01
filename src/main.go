@@ -6,12 +6,14 @@ import (
 	"os"
 
 	"github.com/sam8helloworld/json-go/lexer"
+	"github.com/sam8helloworld/json-go/parser"
+	"github.com/sam8helloworld/json-go/printer"
 )
 
 func main() {
 	fmt.Println("ファイル読み取り処理を開始します")
 	// ファイルをOpenする
-	f, err := os.Open("testdata/string_only.json")
+	f, err := os.Open("testdata/testdata01.json")
 	if err != nil {
 		fmt.Println("error")
 	}
@@ -23,7 +25,15 @@ func main() {
 		fmt.Println("error")
 	}
 	lexer := lexer.NewLexer(string(b))
-	lexer.Execute()
-	// 出力
-	fmt.Println(string(b))
+	tokens, err := lexer.Execute()
+	if err != nil {
+		fmt.Println("error")
+	}
+	parser := parser.NewParser(*tokens)
+	json, err := parser.Execute()
+	if err != nil {
+		fmt.Println("error")
+	}
+	p := printer.NewPrinter(json)
+	p.Execute()
 }

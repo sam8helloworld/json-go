@@ -2,7 +2,7 @@ package value
 
 type String string
 type NumberInt int64
-type NumberFloat int64
+type NumberFloat float64
 type Bool bool
 
 const Null = iota
