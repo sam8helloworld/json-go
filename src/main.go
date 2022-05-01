@@ -13,7 +13,7 @@ import (
 func main() {
 	fmt.Println("ファイル読み取り処理を開始します")
 	// ファイルをOpenする
-	f, err := os.Open("testdata/testdata01.json")
+	f, err := os.Open("sample/sample.json")
 	if err != nil {
 		fmt.Println("error")
 	}
