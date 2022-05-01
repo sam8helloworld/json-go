@@ -10,3 +10,7 @@ func NewStringToken(value string) StringToken {
 		value: value,
 	}
 }
+
+func (st *StringToken) Value() string {
+	return st.value
+}

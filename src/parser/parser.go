@@ -36,35 +36,34 @@ func (p *Parser) Execute() (interface{}, error) {
 
 func (p *Parser) parse() (interface{}, error) {
 	t := p.peek()
-	switch t.Type {
-	case token.LeftBraceType:
+	switch t := t.(type) {
+	case token.LeftBraceToken:
 		return p.parseObject()
-	case token.LeftBracketType:
+	case token.LeftBracketToken:
 		return p.parseArray()
-	case token.StringType:
+	case token.StringToken:
 		p.next()
-		return value.String(t.Expression), nil
-	case token.NumberType:
+		return value.String(t.Value()), nil
+	case token.NumberToken:
 		p.next()
-		i, err := strconv.ParseInt(t.Expression, 10, 64)
+		i, err := strconv.ParseInt(t.Value(), 10, 64)
 		if err == nil {
-			return value.Number(i), nil
+			return value.NumberInt(i), nil
 		}
-		f, err := strconv.ParseFloat(t.Expression, 64)
+		f, err := strconv.ParseFloat(t.Value(), 64)
 		if err == nil {
-			return value.Number(f), nil
+			return value.NumberFloat(f), nil
 		}
 		return nil, ErrInvalidNumberValue
-	case token.FalseType, token.TrueType:
+	case token.TrueToken:
 		p.next()
-		b, err := strconv.ParseBool(t.Expression)
-		if err != nil {
-			return nil, ErrInvalidBoolValue
-		}
-		return value.Bool(b), nil
-	case token.NullType:
+		return value.Bool(true), nil
+	case token.FalseToken:
 		p.next()
-		return value.Null(t.Expression), nil
+		return value.Bool(false), nil
+	case token.NullToken:
+		p.next()
+		return value.Null, nil
 	default:
 		return nil, ErrParse
 	}
@@ -72,7 +71,10 @@ func (p *Parser) parse() (interface{}, error) {
 
 func (p *Parser) parseObject() (value.Object, error) {
 	t := p.peek()
-	if t.Type != token.LeftBraceType {
+
+	switch t.(type) {
+	case token.LeftBraceToken:
+	default:
 		return nil, ErrNotStartWithLeftBrace
 	}
 	// { を読み飛ばす
@@ -80,7 +82,8 @@ func (p *Parser) parseObject() (value.Object, error) {
 
 	object := value.Object{}
 
-	if t.Type == token.RightBraceType {
+	switch t.(type) {
+	case token.RightBraceToken:
 		return object, nil
 	}
 
@@ -88,23 +91,27 @@ func (p *Parser) parseObject() (value.Object, error) {
 		t1 := p.next()
 		t2 := p.next()
 
-		if t1.Type == token.StringType && t2.Type == token.ColonType {
+		t1t, t1Ok := t1.(token.StringToken)
+		_, t2Ok := t2.(token.ColonToken)
+
+		if t1Ok && t2Ok {
 			v, err := p.parse()
 			if err != nil {
 				return nil, err
 			}
-			object[t1.Expression] = v
+			object[t1t.Value()] = v
 		} else {
 			return nil, ErrInvalidKeyValuePair
 		}
 
 		t3 := p.next()
-		if t3.Type == token.RightBraceType {
+		switch t3.(type) {
+		case token.RightBraceToken:
 			return object, nil
-		}
-		if t3.Type == token.CommaType {
+		case token.CommaToken:
 			continue
 		}
+
 		return nil, ErrParse
 	}
 }
@@ -112,16 +119,20 @@ func (p *Parser) parseObject() (value.Object, error) {
 func (p *Parser) parseArray() (value.Array, error) {
 	// 先頭は必ず [
 	t := p.peek()
-	if t.Type != token.LeftBracketType {
+
+	_, ok := t.(token.LeftBracketToken)
+	if !ok {
 		return nil, ErrNotStartWithLeftBracket
 	}
+
 	// [ を読み飛ばす
 	p.next()
 
 	array := value.Array{}
 	t = p.peek()
 	// ] なら空配列を返す
-	if t.Type == token.RightBracketType {
+	switch t.(type) {
+	case token.RightBracketToken:
 		return array, nil
 	}
 
@@ -135,11 +146,11 @@ func (p *Parser) parseArray() (value.Array, error) {
 
 		t = p.next()
 		// `Array`が終端もしくは次の要素(`Value`)があるかを確認
-		if t.Type == token.RightBracketType {
+		switch t.(type) {
+		case token.RightBracketToken:
 			return array, nil
-		}
-		// , なら次の要素(`Value`)をパースする
-		if t.Type == token.CommaType {
+			// , なら次の要素(`Value`)をパースする
+		case token.CommaToken:
 			continue
 		}
 		return nil, ErrParse

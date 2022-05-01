@@ -1,8 +1,11 @@
 package value
 
 type String string
-type Number interface{}
+type NumberInt int64
+type NumberFloat int64
 type Bool bool
-type Null interface{}
+
+const Null = iota
+
 type Array []interface{}
 type Object map[string]interface{}

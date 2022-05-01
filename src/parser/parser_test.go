@@ -17,26 +17,11 @@ func TestSuccess(t *testing.T) {
 		{
 			name: "文字列のみ",
 			input: []token.Token{
-				{
-					Type:       token.LeftBraceType,
-					Expression: "{",
-				},
-				{
-					Type:       token.StringType,
-					Expression: "key",
-				},
-				{
-					Type:       token.ColonType,
-					Expression: ":",
-				},
-				{
-					Type:       token.StringType,
-					Expression: "value",
-				},
-				{
-					Type:       token.RightBraceType,
-					Expression: "}",
-				},
+				token.LeftBraceToken{},
+				token.NewStringToken("key"),
+				token.ColonToken{},
+				token.NewStringToken("value"),
+				token.RightBraceToken{},
 			},
 			want: value.Object{
 				"key": value.String("value"),
@@ -45,54 +30,24 @@ func TestSuccess(t *testing.T) {
 		{
 			name: "数値のみ",
 			input: []token.Token{
-				{
-					Type:       token.LeftBraceType,
-					Expression: "{",
-				},
-				{
-					Type:       token.StringType,
-					Expression: "key",
-				},
-				{
-					Type:       token.ColonType,
-					Expression: ":",
-				},
-				{
-					Type:       token.NumberType,
-					Expression: "100",
-				},
-				{
-					Type:       token.RightBraceType,
-					Expression: "}",
-				},
+				token.LeftBraceToken{},
+				token.NewStringToken("key"),
+				token.ColonToken{},
+				token.NewNumberToken("100"),
+				token.RightBraceToken{},
 			},
 			want: value.Object{
-				"key": value.Number(int64(100)),
+				"key": value.NumberInt(int64(100)),
 			},
 		},
 		{
 			name: "boolのみ",
 			input: []token.Token{
-				{
-					Type:       token.LeftBraceType,
-					Expression: "{",
-				},
-				{
-					Type:       token.StringType,
-					Expression: "key",
-				},
-				{
-					Type:       token.ColonType,
-					Expression: ":",
-				},
-				{
-					Type:       token.TrueType,
-					Expression: "true",
-				},
-				{
-					Type:       token.RightBraceType,
-					Expression: "}",
-				},
+				token.LeftBraceToken{},
+				token.NewStringToken("key"),
+				token.ColonToken{},
+				token.TrueToken{},
+				token.RightBraceToken{},
 			},
 			want: value.Object{
 				"key": value.Bool(true),
@@ -101,70 +56,28 @@ func TestSuccess(t *testing.T) {
 		{
 			name: "nullのみ",
 			input: []token.Token{
-				{
-					Type:       token.LeftBraceType,
-					Expression: "{",
-				},
-				{
-					Type:       token.StringType,
-					Expression: "key",
-				},
-				{
-					Type:       token.ColonType,
-					Expression: ":",
-				},
-				{
-					Type:       token.NullType,
-					Expression: "null",
-				},
-				{
-					Type:       token.RightBraceType,
-					Expression: "}",
-				},
+				token.LeftBraceToken{},
+				token.NewStringToken("key"),
+				token.ColonToken{},
+				token.NullToken{},
+				token.RightBraceToken{},
 			},
 			want: value.Object{
-				"key": value.Null("null"),
+				"key": value.Null,
 			},
 		},
 		{
 			name: "objectがネスト",
 			input: []token.Token{
-				{
-					Type:       token.LeftBraceType,
-					Expression: "{",
-				},
-				{
-					Type:       token.StringType,
-					Expression: "key",
-				},
-				{
-					Type:       token.ColonType,
-					Expression: ":",
-				},
-				{
-					Type:       token.LeftBraceType,
-					Expression: "{",
-				},
-				{
-					Type:       token.StringType,
-					Expression: "key",
-				},
-				{
-					Type:       token.ColonType,
-					Expression: ":",
-				},
-				{
-					Type:       token.StringType,
-					Expression: "value",
-				},
-				{
-					Type:       token.RightBraceType,
-					Expression: "}",
-				},
-				{
-					Type:       token.RightBraceType,
-					Expression: "}",
-				},
+				token.LeftBraceToken{},
+				token.NewStringToken("key"),
+				token.ColonToken{},
+				token.LeftBraceToken{},
+				token.NewStringToken("key"),
+				token.ColonToken{},
+				token.NewStringToken("value"),
+				token.RightBraceToken{},
+				token.RightBraceToken{},
 			},
 			want: value.Object{
 				"key": value.Object{
@@ -175,42 +88,15 @@ func TestSuccess(t *testing.T) {
 		{
 			name: "arrayのみ",
 			input: []token.Token{
-				{
-					Type:       token.LeftBraceType,
-					Expression: "{",
-				},
-				{
-					Type:       token.StringType,
-					Expression: "key",
-				},
-				{
-					Type:       token.ColonType,
-					Expression: ":",
-				},
-				{
-					Type:       token.LeftBracketType,
-					Expression: "[",
-				},
-				{
-					Type:       token.StringType,
-					Expression: "value1",
-				},
-				{
-					Type:       token.CommaType,
-					Expression: ",",
-				},
-				{
-					Type:       token.StringType,
-					Expression: "value2",
-				},
-				{
-					Type:       token.RightBracketType,
-					Expression: "]",
-				},
-				{
-					Type:       token.RightBraceType,
-					Expression: "}",
-				},
+				token.LeftBraceToken{},
+				token.NewStringToken("key"),
+				token.ColonToken{},
+				token.LeftBracketToken{},
+				token.NewStringToken("value1"),
+				token.CommaToken{},
+				token.NewStringToken("value2"),
+				token.RightBracketToken{},
+				token.RightBraceToken{},
 			},
 			want: value.Object{
 				"key": value.Array{
@@ -222,26 +108,11 @@ func TestSuccess(t *testing.T) {
 		{
 			name: "トップレベルがarray",
 			input: []token.Token{
-				{
-					Type:       token.LeftBracketType,
-					Expression: "[",
-				},
-				{
-					Type:       token.StringType,
-					Expression: "value1",
-				},
-				{
-					Type:       token.CommaType,
-					Expression: ",",
-				},
-				{
-					Type:       token.StringType,
-					Expression: "value2",
-				},
-				{
-					Type:       token.RightBracketType,
-					Expression: "]",
-				},
+				token.LeftBracketToken{},
+				token.NewStringToken("value1"),
+				token.CommaToken{},
+				token.NewStringToken("value2"),
+				token.RightBracketToken{},
 			},
 			want: value.Array{
 				value.String("value1"),

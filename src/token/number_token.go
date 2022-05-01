@@ -11,14 +11,6 @@ func NewNumberToken(value string) NumberToken {
 	}
 }
 
-// func (nt *NumberToken) getValue() (interface{}, error) {
-// 	i, err := strconv.ParseInt(nt.value, 10, 64)
-// 	if err == nil {
-// 		return i, nil
-// 	}
-// 	f, err := strconv.ParseFloat(nt.value, 64)
-// 	if err == nil {
-// 		return f, nil
-// 	}
-// 	return nil, ErrInvalidNumber
-// }
+func (nt *NumberToken) Value() string {
+	return nt.value
+}
