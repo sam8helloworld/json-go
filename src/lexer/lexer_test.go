@@ -12,7 +12,7 @@ import (
 )
 
 func TestSuccessStringTokenize(t *testing.T) {
-	f, err := os.Open("../testdata/string_only.json")
+	f, err := os.Open("./testdata/string_only.json")
 	if err != nil {
 		fmt.Println("error")
 	}
@@ -41,7 +41,7 @@ func TestSuccessStringTokenize(t *testing.T) {
 }
 
 func TestFailedStringTokenize(t *testing.T) {
-	f, err := os.Open("../testdata/string_only_fragile.json")
+	f, err := os.Open("./testdata/string_only_fragile.json")
 	if err != nil {
 		fmt.Println("error")
 	}
@@ -63,7 +63,7 @@ func TestFailedStringTokenize(t *testing.T) {
 }
 
 func TestSuccessBoolTokenize(t *testing.T) {
-	f, err := os.Open("../testdata/bool_only.json")
+	f, err := os.Open("./testdata/bool_only.json")
 	if err != nil {
 		fmt.Println("error")
 	}
@@ -96,7 +96,7 @@ func TestSuccessBoolTokenize(t *testing.T) {
 }
 
 func TestFailedBoolTokenize(t *testing.T) {
-	f, err := os.Open("../testdata/bool_only_fragile.json")
+	f, err := os.Open("./testdata/bool_only_fragile.json")
 	if err != nil {
 		fmt.Println("error")
 	}
@@ -118,7 +118,7 @@ func TestFailedBoolTokenize(t *testing.T) {
 }
 
 func TestSuccessNullTokenize(t *testing.T) {
-	f, err := os.Open("../testdata/null_only.json")
+	f, err := os.Open("./testdata/null_only.json")
 	if err != nil {
 		fmt.Println("error")
 	}
@@ -147,7 +147,7 @@ func TestSuccessNullTokenize(t *testing.T) {
 }
 
 func TestFailedNullTokenize(t *testing.T) {
-	f, err := os.Open("../testdata/null_only_fragile.json")
+	f, err := os.Open("./testdata/null_only_fragile.json")
 	if err != nil {
 		fmt.Println("error")
 	}
@@ -169,7 +169,7 @@ func TestFailedNullTokenize(t *testing.T) {
 }
 
 func TestSuccessNumberTokenize(t *testing.T) {
-	f, err := os.Open("../testdata/number_only.json")
+	f, err := os.Open("./testdata/number_only.json")
 	if err != nil {
 		fmt.Println("error")
 	}
@@ -239,7 +239,7 @@ func TestSuccessNumberTokenize(t *testing.T) {
 }
 
 func TestFailedLexer(t *testing.T) {
-	f, err := os.Open("../testdata/lexer_structure_fragile.json")
+	f, err := os.Open("./testdata/lexer_structure_fragile.json")
 	if err != nil {
 		fmt.Println("error")
 	}
