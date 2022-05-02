@@ -15,6 +15,7 @@ var (
 
 const (
 	QuoteSymbol         = byte('"')
+	EscapeSymbol        = byte('\\')
 	LeftBraceSymbol     = byte('{')
 	RightBraceSymbol    = byte('}')
 	LeftBracketSymbol   = byte('[')
@@ -81,7 +82,7 @@ func (l *Lexer) Execute() (*[]token.Token, error) {
 				return nil, err
 			}
 			tokens = append(tokens, token)
-		case ch == WhiteSpaceSymbol, ch == WhiteSpaceTabSymbol, ch == WhiteSpaceTabSymbol, ch == WhiteSpaceCRSymbol, ch == WhiteSpaceLFSymbol:
+		case ch == WhiteSpaceSymbol, ch == WhiteSpaceTabSymbol, ch == WhiteSpaceCRSymbol, ch == WhiteSpaceLFSymbol:
 			continue
 		case ch == QuoteSymbol:
 			token, err := l.stringTokenize()
@@ -134,6 +135,14 @@ func (l *Lexer) peakChar() byte {
 func (l *Lexer) stringTokenize() (token.Token, error) {
 	str := ""
 	for ch := l.readChar(); ch != 0; ch = l.readChar() {
+		if ch == EscapeSymbol {
+			chNext := l.readChar()
+			switch chNext {
+			case QuoteSymbol:
+				str += string(chNext)
+				continue
+			}
+		}
 		if ch == QuoteSymbol {
 			return token.NewStringToken(str), nil
 		}
