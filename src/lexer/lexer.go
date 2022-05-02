@@ -14,36 +14,36 @@ var (
 )
 
 const (
-	QuoteSymbol         = byte('"')
-	EscapeSymbol        = byte('\\')
-	LeftBraceSymbol     = byte('{')
-	RightBraceSymbol    = byte('}')
-	LeftBracketSymbol   = byte('[')
-	RightBracketSymbol  = byte(']')
-	CommaSymbol         = byte(',')
-	ColonSymbol         = byte(':')
-	TrueSymbol          = byte('t')
-	FalseSymbol         = byte('f')
-	NullSymbol          = byte('n')
-	WhiteSpaceSymbol    = byte(' ')
-	WhiteSpaceTabSymbol = byte('\t')
-	WhiteSpaceCRSymbol  = byte('\r')
-	WhiteSpaceLFSymbol  = byte('\n')
-	NumberPlusSymbol    = byte('+')
-	NumberMinusSymbol   = byte('-')
-	NumberDotSymbol     = byte('.')
+	QuoteSymbol         = rune('"')
+	EscapeSymbol        = rune('\\')
+	LeftBraceSymbol     = rune('{')
+	RightBraceSymbol    = rune('}')
+	LeftBracketSymbol   = rune('[')
+	RightBracketSymbol  = rune(']')
+	CommaSymbol         = rune(',')
+	ColonSymbol         = rune(':')
+	TrueSymbol          = rune('t')
+	FalseSymbol         = rune('f')
+	NullSymbol          = rune('n')
+	WhiteSpaceSymbol    = rune(' ')
+	WhiteSpaceTabSymbol = rune('\t')
+	WhiteSpaceCRSymbol  = rune('\r')
+	WhiteSpaceLFSymbol  = rune('\n')
+	NumberPlusSymbol    = rune('+')
+	NumberMinusSymbol   = rune('-')
+	NumberDotSymbol     = rune('.')
 )
 
 type Lexer struct {
-	Input        string
+	Input        []rune
 	Position     int  // 読み込んでる文字のインデックス
 	ReadPosition int  // 次に読み込む文字のインデックス
-	Ch           byte // 検査中の文字
+	Ch           rune // 検査中の文字
 }
 
 func NewLexer(input string) *Lexer {
 	// Lexerに引数inputをセットしreturn
-	return &Lexer{Input: input}
+	return &Lexer{Input: []rune(input)}
 }
 
 func (l *Lexer) Execute() (*[]token.Token, error) {
@@ -108,7 +108,7 @@ func (l *Lexer) Execute() (*[]token.Token, error) {
 	return &tokens, nil
 }
 
-func (l *Lexer) readChar() byte {
+func (l *Lexer) readChar() rune {
 	// 入力が終わったらchを0に
 	if l.ReadPosition >= len(l.Input) {
 		l.Ch = 0
@@ -123,7 +123,7 @@ func (l *Lexer) readChar() byte {
 	return l.Ch
 }
 
-func (l *Lexer) peakChar() byte {
+func (l *Lexer) peakChar() rune {
 	// 入力が終わったらchを0に
 	if l.ReadPosition >= len(l.Input) {
 		return 0
@@ -196,7 +196,7 @@ func (l *Lexer) numberTokenize() (token.Token, error) {
 	return token.NewNumberToken(num), nil
 }
 
-func isNumberSymbol(s byte) bool {
+func isNumberSymbol(s rune) bool {
 	// 数字に使いそうな文字は全て読み込む
 	// 1e10, 1E10, 1.0000
 	if ('0' <= s && s <= '9') || s == NumberPlusSymbol || s == NumberMinusSymbol || s == NumberDotSymbol || s == 'e' || s == 'E' {

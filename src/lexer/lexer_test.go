@@ -61,7 +61,7 @@ func TestSuccessStringTokenizeEscape(t *testing.T) {
 		token.LeftBraceToken{},
 		token.NewStringToken("escape_double_quote"),
 		token.ColonToken{},
-		token.NewStringToken("\"\""),
+		token.NewStringToken("\"ダブルクォーテーション\""),
 		token.RightBraceToken{},
 	}
 	if diff := cmp.Diff(got, want, cmp.AllowUnexported(token.StringToken{})); diff != "" {
