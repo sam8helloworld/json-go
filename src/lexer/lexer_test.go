@@ -40,6 +40,35 @@ func TestSuccessStringTokenize(t *testing.T) {
 	}
 }
 
+func TestSuccessStringTokenizeEscape(t *testing.T) {
+	f, err := os.Open("./testdata/escape_string_only.json")
+	if err != nil {
+		fmt.Println("error")
+	}
+	defer f.Close()
+
+	// 一気に全部読み取り
+	b, err := ioutil.ReadAll(f)
+	if err != nil {
+		fmt.Println("error")
+	}
+	sut := NewLexer(string(b))
+	got, err := sut.Execute()
+	if err != nil {
+		t.Fatalf("failed to execute lexer %#v", err)
+	}
+	want := &[]token.Token{
+		token.LeftBraceToken{},
+		token.NewStringToken("escape_double_quote"),
+		token.ColonToken{},
+		token.NewStringToken("\"\""),
+		token.RightBraceToken{},
+	}
+	if diff := cmp.Diff(got, want, cmp.AllowUnexported(token.StringToken{})); diff != "" {
+		t.Fatalf("got differs: (-got +want)\n%s", diff)
+	}
+}
+
 func TestFailedStringTokenize(t *testing.T) {
 	f, err := os.Open("./testdata/string_only_fragile.json")
 	if err != nil {
