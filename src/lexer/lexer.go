@@ -38,6 +38,10 @@ const (
 	NumberPlusSymbol    = rune('+')
 	NumberMinusSymbol   = rune('-')
 	NumberDotSymbol     = rune('.')
+	NewPageSymbol       = rune('f')
+	LFSymbol            = rune('n')
+	CRSymbol            = rune('r')
+	TabSymbol           = rune('t')
 )
 
 type Lexer struct {
@@ -146,10 +150,10 @@ func (l *Lexer) stringTokenize() (token.Token, error) {
 		case EscapeSymbol:
 			chNext := l.readChar()
 			switch chNext {
-			case QuoteSymbol, SlashSymbol:
+			case QuoteSymbol:
 				str = append(str, chNext)
 				continue
-			case BackspaceSymbol:
+			case BackspaceSymbol, NewPageSymbol, TabSymbol, LFSymbol, CRSymbol, SlashSymbol:
 				str = append(str, EscapeSymbol)
 				str = append(str, chNext)
 				continue
@@ -165,22 +169,28 @@ func (l *Lexer) stringTokenize() (token.Token, error) {
 						hexString += string(c)
 					}
 				}
-				if len(utf16Buf) == 0 {
-					// bufに追加
-					hex, err := strconv.ParseInt(hexString, 16, 32)
-					if err != nil {
-						return nil, ErrStringToHex
+				hex, err := strconv.ParseInt(hexString, 16, 32)
+				if err != nil {
+					return nil, ErrStringToHex
+				}
+
+				utf16Buf = append(utf16Buf, rune(hex))
+				// サロゲートペアが必要かどうか
+				if utf16.IsSurrogate(rune(hex)) {
+					// 既に2つ溜まっていたら1文字のruneに変換
+					if len(utf16Buf) == 2 {
+						if s := runeFromHexPairs(utf16Buf); s != 0 {
+							str = append(str, []rune(string(s))...)
+						}
+						utf16Buf = []rune{}
 					}
-					utf16Buf = append(utf16Buf, rune(hex))
+					// 1つしか溜まっていない場合はもう一回探しにいく
 				} else {
-					hex, err := strconv.ParseInt(hexString, 16, 32)
-					if err != nil {
-						return nil, ErrStringToHex
+					// サロゲートペアが不要な場合は1文字のruneに変換
+					if s := runeFromOneHex(utf16Buf); s != 0 {
+						str = append(str, []rune(string(s))...)
+						utf16Buf = []rune{}
 					}
-					utf16Buf = append(utf16Buf, rune(hex))
-					got := utf16.DecodeRune(utf16Buf[0], utf16Buf[1])
-					utf16Buf = []rune{}
-					str = append(str, got)
 				}
 				continue
 			}
@@ -251,4 +261,12 @@ func isAsciiHexdigit(v rune) bool {
 		return true
 	}
 	return false
+}
+
+func runeFromOneHex(rs []rune) rune {
+	return rs[0]
+}
+
+func runeFromHexPairs(rs []rune) rune {
+	return utf16.DecodeRune(rs[0], rs[1])
 }
