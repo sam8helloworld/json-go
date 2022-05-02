@@ -2,6 +2,8 @@ package lexer
 
 import (
 	"errors"
+	"strconv"
+	"unicode/utf16"
 
 	"github.com/sam8helloworld/json-go/token"
 )
@@ -10,39 +12,48 @@ var (
 	ErrStringTokenize = errors.New("failed to string tokenize")
 	ErrBoolTokenize   = errors.New("failed to bool tokenize")
 	ErrNullTokenize   = errors.New("failed to null tokenize")
+	ErrStringToHex    = errors.New("failed to string to hex")
 	ErrLexer          = errors.New("failed to lexer")
 )
 
 const (
-	QuoteSymbol         = byte('"')
-	LeftBraceSymbol     = byte('{')
-	RightBraceSymbol    = byte('}')
-	LeftBracketSymbol   = byte('[')
-	RightBracketSymbol  = byte(']')
-	CommaSymbol         = byte(',')
-	ColonSymbol         = byte(':')
-	TrueSymbol          = byte('t')
-	FalseSymbol         = byte('f')
-	NullSymbol          = byte('n')
-	WhiteSpaceSymbol    = byte(' ')
-	WhiteSpaceTabSymbol = byte('\t')
-	WhiteSpaceCRSymbol  = byte('\r')
-	WhiteSpaceLFSymbol  = byte('\n')
-	NumberPlusSymbol    = byte('+')
-	NumberMinusSymbol   = byte('-')
-	NumberDotSymbol     = byte('.')
+	QuoteSymbol         = rune('"')
+	EscapeSymbol        = rune('\\')
+	SlashSymbol         = rune('/')
+	LeftBraceSymbol     = rune('{')
+	RightBraceSymbol    = rune('}')
+	LeftBracketSymbol   = rune('[')
+	RightBracketSymbol  = rune(']')
+	CommaSymbol         = rune(',')
+	ColonSymbol         = rune(':')
+	TrueSymbol          = rune('t')
+	FalseSymbol         = rune('f')
+	NullSymbol          = rune('n')
+	BackspaceSymbol     = rune('b')
+	Utf16EscapeSymbol   = rune('u')
+	WhiteSpaceSymbol    = rune(' ')
+	WhiteSpaceTabSymbol = rune('\t')
+	WhiteSpaceCRSymbol  = rune('\r')
+	WhiteSpaceLFSymbol  = rune('\n')
+	NumberPlusSymbol    = rune('+')
+	NumberMinusSymbol   = rune('-')
+	NumberDotSymbol     = rune('.')
+	NewPageSymbol       = rune('f')
+	LFSymbol            = rune('n')
+	CRSymbol            = rune('r')
+	TabSymbol           = rune('t')
 )
 
 type Lexer struct {
-	Input        string
+	Input        []rune
 	Position     int  // 読み込んでる文字のインデックス
 	ReadPosition int  // 次に読み込む文字のインデックス
-	Ch           byte // 検査中の文字
+	Ch           rune // 検査中の文字
 }
 
 func NewLexer(input string) *Lexer {
 	// Lexerに引数inputをセットしreturn
-	return &Lexer{Input: input}
+	return &Lexer{Input: []rune(input)}
 }
 
 func (l *Lexer) Execute() (*[]token.Token, error) {
@@ -81,7 +92,7 @@ func (l *Lexer) Execute() (*[]token.Token, error) {
 				return nil, err
 			}
 			tokens = append(tokens, token)
-		case ch == WhiteSpaceSymbol, ch == WhiteSpaceTabSymbol, ch == WhiteSpaceTabSymbol, ch == WhiteSpaceCRSymbol, ch == WhiteSpaceLFSymbol:
+		case ch == WhiteSpaceSymbol, ch == WhiteSpaceTabSymbol, ch == WhiteSpaceCRSymbol, ch == WhiteSpaceLFSymbol:
 			continue
 		case ch == QuoteSymbol:
 			token, err := l.stringTokenize()
@@ -107,7 +118,7 @@ func (l *Lexer) Execute() (*[]token.Token, error) {
 	return &tokens, nil
 }
 
-func (l *Lexer) readChar() byte {
+func (l *Lexer) readChar() rune {
 	// 入力が終わったらchを0に
 	if l.ReadPosition >= len(l.Input) {
 		l.Ch = 0
@@ -122,7 +133,7 @@ func (l *Lexer) readChar() byte {
 	return l.Ch
 }
 
-func (l *Lexer) peakChar() byte {
+func (l *Lexer) peakChar() rune {
 	// 入力が終わったらchを0に
 	if l.ReadPosition >= len(l.Input) {
 		return 0
@@ -132,12 +143,61 @@ func (l *Lexer) peakChar() byte {
 }
 
 func (l *Lexer) stringTokenize() (token.Token, error) {
-	str := ""
+	str := []rune("")
+	utf16Buf := []rune{}
 	for ch := l.readChar(); ch != 0; ch = l.readChar() {
-		if ch == QuoteSymbol {
-			return token.NewStringToken(str), nil
+		switch ch {
+		case EscapeSymbol:
+			chNext := l.readChar()
+			switch chNext {
+			case QuoteSymbol:
+				str = append(str, chNext)
+				continue
+			case BackspaceSymbol, NewPageSymbol, TabSymbol, LFSymbol, CRSymbol, SlashSymbol:
+				str = append(str, EscapeSymbol)
+				str = append(str, chNext)
+				continue
+			case Utf16EscapeSymbol:
+				// UTF-16
+				// \u0000 ~ \uFFFF
+				// \uまで読み込んだので残りの0000~XXXXの4文字を読み込む
+				// UTF-16に関してはエスケープ処理を行う
+				hexString := ""
+				for i := 0; i < 4; i++ {
+					c := l.readChar()
+					if isAsciiHexdigit(c) {
+						hexString += string(c)
+					}
+				}
+				hex, err := strconv.ParseInt(hexString, 16, 32)
+				if err != nil {
+					return nil, ErrStringToHex
+				}
+
+				utf16Buf = append(utf16Buf, rune(hex))
+				// サロゲートペアが必要かどうか
+				if utf16.IsSurrogate(rune(hex)) {
+					// 既に2つ溜まっていたら1文字のruneに変換
+					if len(utf16Buf) == 2 {
+						if s := runeFromHexPairs(utf16Buf); s != 0 {
+							str = append(str, []rune(string(s))...)
+						}
+						utf16Buf = []rune{}
+					}
+					// 1つしか溜まっていない場合はもう一回探しにいく
+				} else {
+					// サロゲートペアが不要な場合は1文字のruneに変換
+					if s := runeFromOneHex(utf16Buf); s != 0 {
+						str = append(str, []rune(string(s))...)
+						utf16Buf = []rune{}
+					}
+				}
+				continue
+			}
+		case QuoteSymbol:
+			return token.NewStringToken(string(str)), nil
 		}
-		str += string(ch)
+		str = append(str, ch)
 	}
 	return nil, ErrStringTokenize
 }
@@ -187,11 +247,26 @@ func (l *Lexer) numberTokenize() (token.Token, error) {
 	return token.NewNumberToken(num), nil
 }
 
-func isNumberSymbol(s byte) bool {
+func isNumberSymbol(s rune) bool {
 	// 数字に使いそうな文字は全て読み込む
 	// 1e10, 1E10, 1.0000
 	if ('0' <= s && s <= '9') || s == NumberPlusSymbol || s == NumberMinusSymbol || s == NumberDotSymbol || s == 'e' || s == 'E' {
 		return true
 	}
 	return false
+}
+
+func isAsciiHexdigit(v rune) bool {
+	if ('0' <= v && v <= '9') || ('a' <= v && v <= 'f') || ('A' <= v && v <= 'F') {
+		return true
+	}
+	return false
+}
+
+func runeFromOneHex(rs []rune) rune {
+	return rs[0]
+}
+
+func runeFromHexPairs(rs []rune) rune {
+	return utf16.DecodeRune(rs[0], rs[1])
 }

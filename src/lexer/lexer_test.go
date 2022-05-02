@@ -40,6 +40,55 @@ func TestSuccessStringTokenize(t *testing.T) {
 	}
 }
 
+func TestSuccessStringTokenizeEscape(t *testing.T) {
+	f, err := os.Open("./testdata/escape_string_only.json")
+	if err != nil {
+		fmt.Println("error")
+	}
+	defer f.Close()
+
+	// 一気に全部読み取り
+	b, err := ioutil.ReadAll(f)
+	if err != nil {
+		fmt.Println("error")
+	}
+	sut := NewLexer(string(b))
+	got, err := sut.Execute()
+	if err != nil {
+		t.Fatalf("failed to execute lexer %#v", err)
+	}
+	want := &[]token.Token{
+		token.LeftBraceToken{},
+		token.NewStringToken("escape_double_quote"),
+		token.ColonToken{},
+		token.NewStringToken(`"ダブルクォーテーション"`),
+		token.CommaToken{},
+		token.NewStringToken("escape_backslash"),
+		token.ColonToken{},
+		token.NewStringToken(`\バックスラッシュ`),
+		token.CommaToken{},
+		token.NewStringToken("escape_slash"),
+		token.ColonToken{},
+		token.NewStringToken(`\/スラッシュ`),
+		token.CommaToken{},
+		token.NewStringToken("escape_utf_16_text"),
+		token.ColonToken{},
+		token.NewStringToken("あいうabc"),
+		token.CommaToken{},
+		token.NewStringToken("escape_utf_16_emoji"),
+		token.ColonToken{},
+		token.NewStringToken("😄😇👺"),
+		token.CommaToken{},
+		token.NewStringToken("escape_special_chars"),
+		token.ColonToken{},
+		token.NewStringToken(` \b \f \n \r \t \/ " `),
+		token.RightBraceToken{},
+	}
+	if diff := cmp.Diff(got, want, cmp.AllowUnexported(token.StringToken{})); diff != "" {
+		t.Fatalf("got differs: (-got +want)\n%s", diff)
+	}
+}
+
 func TestFailedStringTokenize(t *testing.T) {
 	f, err := os.Open("./testdata/string_only_fragile.json")
 	if err != nil {

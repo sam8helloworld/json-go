@@ -1,0 +1,8 @@
+{
+    "escape_double_quote":"\"ダブルクォーテーション\"",
+    "escape_backslash":"\\バックスラッシュ",
+    "escape_slash":"\/スラッシュ",
+    "escape_utf_16_text": "\u3042\u3044\u3046abc",
+    "escape_utf_16_emoji": "\uD83D\uDE04\uD83D\uDE07\uD83D\uDC7A",
+    "escape_special_chars": " \b \f \n \r \t \/ \" "
+}
