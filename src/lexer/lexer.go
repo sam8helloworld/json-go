@@ -16,6 +16,7 @@ var (
 const (
 	QuoteSymbol         = rune('"')
 	EscapeSymbol        = rune('\\')
+	SlashSymbol         = rune('/')
 	LeftBraceSymbol     = rune('{')
 	RightBraceSymbol    = rune('}')
 	LeftBracketSymbol   = rune('[')
@@ -25,6 +26,7 @@ const (
 	TrueSymbol          = rune('t')
 	FalseSymbol         = rune('f')
 	NullSymbol          = rune('n')
+	BackspaceSymbol     = rune('b')
 	WhiteSpaceSymbol    = rune(' ')
 	WhiteSpaceTabSymbol = rune('\t')
 	WhiteSpaceCRSymbol  = rune('\r')
@@ -133,20 +135,24 @@ func (l *Lexer) peakChar() rune {
 }
 
 func (l *Lexer) stringTokenize() (token.Token, error) {
-	str := ""
+	str := []rune("")
 	for ch := l.readChar(); ch != 0; ch = l.readChar() {
-		if ch == EscapeSymbol {
+		switch ch {
+		case EscapeSymbol:
 			chNext := l.readChar()
 			switch chNext {
-			case QuoteSymbol:
-				str += string(chNext)
+			case QuoteSymbol, SlashSymbol:
+				str = append(str, chNext)
+				continue
+			case BackspaceSymbol:
+				str = append(str, EscapeSymbol)
+				str = append(str, chNext)
 				continue
 			}
+		case QuoteSymbol:
+			return token.NewStringToken(string(str)), nil
 		}
-		if ch == QuoteSymbol {
-			return token.NewStringToken(str), nil
-		}
-		str += string(ch)
+		str = append(str, ch)
 	}
 	return nil, ErrStringTokenize
 }
