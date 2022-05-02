@@ -2,6 +2,8 @@ package lexer
 
 import (
 	"errors"
+	"strconv"
+	"unicode/utf16"
 
 	"github.com/sam8helloworld/json-go/token"
 )
@@ -10,6 +12,7 @@ var (
 	ErrStringTokenize = errors.New("failed to string tokenize")
 	ErrBoolTokenize   = errors.New("failed to bool tokenize")
 	ErrNullTokenize   = errors.New("failed to null tokenize")
+	ErrStringToHex    = errors.New("failed to string to hex")
 	ErrLexer          = errors.New("failed to lexer")
 )
 
@@ -27,6 +30,7 @@ const (
 	FalseSymbol         = rune('f')
 	NullSymbol          = rune('n')
 	BackspaceSymbol     = rune('b')
+	Utf16EscapeSymbol   = rune('u')
 	WhiteSpaceSymbol    = rune(' ')
 	WhiteSpaceTabSymbol = rune('\t')
 	WhiteSpaceCRSymbol  = rune('\r')
@@ -136,6 +140,7 @@ func (l *Lexer) peakChar() rune {
 
 func (l *Lexer) stringTokenize() (token.Token, error) {
 	str := []rune("")
+	utf16Buf := []rune{}
 	for ch := l.readChar(); ch != 0; ch = l.readChar() {
 		switch ch {
 		case EscapeSymbol:
@@ -147,6 +152,36 @@ func (l *Lexer) stringTokenize() (token.Token, error) {
 			case BackspaceSymbol:
 				str = append(str, EscapeSymbol)
 				str = append(str, chNext)
+				continue
+			case Utf16EscapeSymbol:
+				// UTF-16
+				// \u0000 ~ \uFFFF
+				// \uまで読み込んだので残りの0000~XXXXの4文字を読み込む
+				// UTF-16に関してはエスケープ処理を行う
+				hexString := ""
+				for i := 0; i < 4; i++ {
+					c := l.readChar()
+					if isAsciiHexdigit(c) {
+						hexString += string(c)
+					}
+				}
+				if len(utf16Buf) == 0 {
+					// bufに追加
+					hex, err := strconv.ParseInt(hexString, 16, 32)
+					if err != nil {
+						return nil, ErrStringToHex
+					}
+					utf16Buf = append(utf16Buf, rune(hex))
+				} else {
+					hex, err := strconv.ParseInt(hexString, 16, 32)
+					if err != nil {
+						return nil, ErrStringToHex
+					}
+					utf16Buf = append(utf16Buf, rune(hex))
+					got := utf16.DecodeRune(utf16Buf[0], utf16Buf[1])
+					utf16Buf = []rune{}
+					str = append(str, got)
+				}
 				continue
 			}
 		case QuoteSymbol:
@@ -206,6 +241,13 @@ func isNumberSymbol(s rune) bool {
 	// 数字に使いそうな文字は全て読み込む
 	// 1e10, 1E10, 1.0000
 	if ('0' <= s && s <= '9') || s == NumberPlusSymbol || s == NumberMinusSymbol || s == NumberDotSymbol || s == 'e' || s == 'E' {
+		return true
+	}
+	return false
+}
+
+func isAsciiHexdigit(v rune) bool {
+	if ('0' <= v && v <= '9') || ('a' <= v && v <= 'f') || ('A' <= v && v <= 'F') {
 		return true
 	}
 	return false

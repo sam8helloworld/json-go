@@ -74,6 +74,10 @@ func TestSuccessStringTokenizeEscape(t *testing.T) {
 		token.NewStringToken("escape_backspace"),
 		token.ColonToken{},
 		token.NewStringToken(`\bバックスペース`),
+		token.CommaToken{},
+		token.NewStringToken("escape_utf_16_emoji"),
+		token.ColonToken{},
+		token.NewStringToken("😄😇👺"),
 		token.RightBraceToken{},
 	}
 	if diff := cmp.Diff(got, want, cmp.AllowUnexported(token.StringToken{})); diff != "" {

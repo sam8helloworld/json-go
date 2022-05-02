@@ -2,5 +2,6 @@
     "escape_double_quote":"\"ダブルクォーテーション\"",
     "escape_backslash":"\\バックスラッシュ",
     "escape_slash":"\/スラッシュ",
-    "escape_backspace":"\bバックスペース"
+    "escape_backspace":"\bバックスペース",
+    "escape_utf_16_emoji": "\uD83D\uDE04\uD83D\uDE07\uD83D\uDC7A"
 }
